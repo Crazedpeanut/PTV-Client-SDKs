@@ -1,0 +1,212 @@
+# Example YAML to get you started quickly.
+# Be aware that YAML has indentation based scoping.
+# Code completion support is available so start typing for available options.
+swagger: '2.0'
+
+# This is your document metadata
+info:
+  version: "2.3.0"
+  title: PTV Timetable API
+  
+host: timetableapi.ptv.vic.gov.au
+
+basePath: /v2
+
+# Describe your paths here
+paths:
+
+  /nearme:
+    # This is a HTTP operation
+    get:
+      # Describe this verb here. Note: you can use markdown
+      description: |
+        Stops Nearby returns up to 30 stops nearest to a specified coordinate.
+
+        Applicable stops are returned as a collection in the JSON format.
+          
+        Notes
+          
+        “stops” includes train stations as well as tram and bus stops.
+        There are no spatial constraints on how Stops Nearby retrieves stops. It will always return up to 30 stops near the passed latitude and longitude coordinates, even if some of those stops are (relatively) far away.
+        
+      # This is array of GET operation parameters:
+      parameters:
+        # An example parameter that is in query and is required
+        -
+          name: latitude
+          in: query
+          description: prescribed latitude, expressed in decimal degrees - e.g. -37.82392124423254
+          required: true
+          type: number
+          format: Decimal
+        -
+          name: longitude
+          in: query
+          description: prescribed longitude, expressed in decimal degrees - e.g. -37.82392124423254
+          required: true
+          type: number
+          format: Decimal
+  
+        -
+          name: devid  
+          in: query
+          description: The developer ID supplied in your email from PTV
+          required: true
+          type: string
+          format: string
+          
+        - 
+          name: signature
+          in: query
+          description: the customised message digest calculated using the method in the Quick start guide in the full API documentation
+          required: true
+          type: string
+          format: string
+      # Expected responses for this operation:
+      responses:
+        # Response code
+        200:
+          description: Successful response
+          # A schema describing your response object.
+          # Use JSON Schema format
+          schema:
+            title: results
+            type: array
+            items:
+              title: result
+              $ref: '#/definitions/NearMeResultObject'
+              
+  /poi:
+      get:
+        description: | 
+          Transport POIs by Map returns a set of locations consisting of stops and/or myki ticket outlets (collectively
+          known as points of interest – i.e. POIs) within a region demarcated on a map through a set of latitude and longitude coordinates.
+  
+          Where POIs are geographically dispersed they are returned in a list; where they are geographically concentrated they can be returned in a cluster, depending on the map griddepth that is sent in the request.
+      
+        parameters:
+          -
+            name: poi
+            in: query
+            description: |
+              a comma separated list of numbers representing the types of POIs you want returned, defined as follows:
+              - 0	Train (metropolitan)
+              - 1	Tram
+              - 2	Bus (metropolitan and regional, but not V/Line)
+              - 3	V/Line regional train and coach
+              - 4	Night Bus (which replaced NightRider
+              - 100	Ticket outlet
+              
+              e.g. “0,1,2,4,100” would return train, tram, bus, NightRider & ticket outlets
+            required: true
+            type: string
+            format: string
+          -
+            name: lat1
+            in: query
+            description: latitude at the top left corner of a region depicted on a map, expressed in decimal degrees - e.g. -3.82392124423254
+            type: number
+            format: decimal
+            required: true
+          -
+            name: lat2
+            in: query
+            description: latitude at the bottom right corner of a region depicted on a map, expressed in decimal degrees - e.g. -37.81540959390813
+            type: number
+            format: decimal
+            required: true
+          -
+            name: long1
+            in: query
+            description: longitude at the top left corner of a region depicted on a map, expressed in decimal degrees - e.g. 144.9462017431463
+            type: number
+            format: decimal
+            required: true
+          -
+            name: long2
+            in: query
+            description: longitude at the bottom right corner of a region depicted on a map, expressed in decimal degrees - e.g. 144.9542017407848
+            type: number
+            format: decimal
+            required: true
+          -
+            name: griddepth
+            in: query
+            description: the number of cells per block of cluster grid (between 0-20 inclusive) - e.g. “1”
+            type: number
+            format: integer
+            required: true
+          -
+            name: limit
+            in: query
+            description: |
+              The minimum number of POIs (stops or outlets) required to create a cluster, as well as the maximum number of POIs returned as part of a cluster in the JSON response (for example, if the limit is “4”, at least 4 POIs are required to form a cluster; and in the JSON response, if there are 7 total locations in a cluster, only 4 will be listed in the response) - e.g. 4
+            type: number
+            format: integer
+            required: true
+          -
+            name: devid  
+            in: query
+            description: The developer ID supplied in your email from PTV
+            required: true
+            type: string
+            format: string
+            
+          - 
+            name: signature
+            in: query
+            description: the customised message digest calculated using the method in the Quick start guide in the full API documentation
+            required: true
+            type: string
+            format: string
+        
+        
+        responses:
+          200://TODO
+            description: Successful response
+            schema:
+              title: results
+              type: array
+              items:
+                title: result
+                
+                  
+definitions:
+      
+  NearMeResultObject:
+    type: object
+    properties:
+      type:
+        $ref: '#/definitions/StopObject'
+      
+  StopObject:
+    type: object
+    properties:
+      distance:
+        type: number
+        format: decimal
+      suburb:
+        type: string
+        format: string
+      transport_type:
+        type: string
+        format: “train”, “tram”, “bus”, “vline” or “nightrider”
+      route_type:
+        type: number
+        format:  0    Train (metropolitan)
+                 1    Tram
+                 2    Bus (metropolitan, regional and Skybus, but not V/Line) 
+                 3    V/Line train and coach
+                 4    Night Bus (which replaced NightRider)
+      stop_id:
+        type: number
+        format: integer
+      location_name: 
+        type: string
+        format: string
+      latitude:
+        type: number
+        format: decimal
+      longitude:
+        type: number
+        format: decimal
